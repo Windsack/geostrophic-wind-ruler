@@ -1,5 +1,9 @@
 # Geostrophic Wind Ruler · MB Sailing
 
+🧭 Calm weather routing.
+✈️ Aviation discipline, applied offshore.
+🌬️ Practical meteorology, when the sea doesn't care about models.
+
 **DE** 🇩🇪  
 Dieses Tool wurde ursprünglich für die praktische Anwendung beim Wetterrouting im Segelkontext entwickelt.  
 Es dient der schnellen Abschätzung meteorologischer Größen (Druckgradient, geostrophischer Wind, geschätzter Bodenwind) direkt aus Isobarenabständen.  
