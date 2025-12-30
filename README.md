@@ -41,7 +41,7 @@ Works locally in the browser (desktop & mobile).
 ⚠️ Mobile devices may require chart images with moderate resolution for performance.
 
 Live version:  
-https://mb-sailing.com/geostrophic-wind-ruler.html
+https://mb-sailing.com/gradient-tool.html
 
 ---
 
