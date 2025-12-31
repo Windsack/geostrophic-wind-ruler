@@ -6,11 +6,11 @@
     <title>Geostrophic Wind Ruler · MB Sailing – Yacht Delivery & Weather Routing</title>
 
     <!-- SEO / Metadata -->
-    <meta name="description" content="Geostrophisches Windlineal – interaktives Tool zur Abschätzung von Druckgradienten, geostrophischem Wind und geschätztem Bodenwind anhand von Isobarenabständen. Praktisch für Segler, Yachtüberführungen und Wetterrouting.">
+    <meta name="description" content="Geostrophisches Windlineal – interaktives Tool zur Abschätzung von Druckgradienten, geostrophischem Wind und geschätzten Bodenwind anhand von Isobarenabständen. Praktisch für Segler, Yachtüberführungen und Wetterrouting.">
     <meta name="keywords" content="geostrophischer Wind, Druckgradient, Isobaren, Wetterrouting, Yacht Delivery, Segeln, Navigation, MB Sailing, geostrophic wind calculator, pressure gradient tool, wind aus isobaren, geostrophic wind ruler">
     <meta name="author" content="Matthias Baier – MB Sailing">
     <meta name="license" content="CC BY-NC 4.0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- OG / Social Sharing -->
     <meta property="og:title" content="Geostrophisches Windlineal – MB Sailing">
@@ -44,7 +44,11 @@ h1 { font-size:1.6rem; margin:0.3rem 0; }
 p { font-size:0.95rem; margin:0.5rem 0; }
 
 /* ===== NAV ===== */
-.nav { display:flex; gap:16px; flex-wrap:wrap; padding:10px 0; margin:12px 0 20px; border-top:1px solid #ddd; border-bottom:1px solid #ddd; }
+.nav {
+    display:flex; gap:16px; flex-wrap:wrap;
+    padding:10px 0; margin:12px 0 20px;
+    border-top:1px solid #ddd; border-bottom:1px solid #ddd;
+}
 .nav a{color:#666;text-decoration:none;font-size:0.9rem;}
 .nav a:hover{color:#0f766e;border-bottom:1px solid #0f766e;}
 .nav a.active{font-weight:600;color:#0f766e;border-bottom:1px solid #0f766e;}
@@ -53,17 +57,66 @@ p { font-size:0.95rem; margin:0.5rem 0; }
 .tool-shell{padding:0 0 40px;}
 .tool-inner{max-width:2000px;margin:auto;padding:0 20px;}
 .tool-wrapper{margin-top:1.2rem;display:flex;flex-direction:column;gap:1rem;}
+
 #controls{
     background:#f9fafb;border-radius:0.75rem;border:1px solid #e5e7eb;
     padding:0.75rem;font-size:0.9rem;flex-shrink:0;
 }
+#controls label{
+    display:block;margin-top:0.4rem;
+}
+#controls input[type="number"],
+#controls input[type="file"]{
+    width:100%;margin-top:0.25rem;
+    padding:0.3rem 0.4rem;
+    font-size:0.9rem;font-family:inherit;
+}
+#controls button{
+    width:100%;margin-top:0.4rem;
+    padding:0.45rem 0.6rem;
+    font-size:0.9rem;
+    border-radius:0.5rem;
+    border:1px solid #0f766e;
+    background:#0f766e;color:#fff;
+    cursor:pointer;font-weight:500;
+}
+#controls button:hover{
+    background:#115e59;border-color:#0f4f4a;
+}
+
+/* View controls (Pan & Zoom) */
+.view-controls{
+    margin-top:0.7rem;
+    padding-top:0.5rem;
+    border-top:1px dashed #d1d5db;
+    font-size:0.8rem;
+}
+.view-controls span{
+    display:block;margin-bottom:0.3rem;color:#555;
+}
+.view-controls button{
+    width:auto;
+    display:inline-block;
+    margin:2px 3px 0 0;
+    padding:0.3rem 0.45rem;
+    font-size:0.8rem;
+    border-radius:0.4rem;
+    border:1px solid #9ca3af;
+    background:#f9fafb;
+    color:#111;
+}
+.view-controls button:hover{
+    background:#e5e7eb;
+}
+
+/* Canvas container */
 #canvasContainer{
     background:#f9fafb;border-radius:0.75rem;
     border:1px solid #e5e7eb;padding:0.5rem;
     width:100%;
 }
 #mapCanvas{
-    display:block;width:100%!important;height:auto;
+    display:block;width:100%;height:auto;
     border-radius:0.5rem;border:1px solid #d1d5db;
 }
 
@@ -89,7 +142,9 @@ p { font-size:0.95rem; margin:0.5rem 0; }
 <header>
 <div class="logo-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
     <a href="index.html"><img src="ydrs-Dateien/image011.png" alt="MB Sailing" style="height:40px;"></a>
-    <a href="mailto:alloceans@mb-sailing.com"><img src="ydrs-Dateien/image003.jpg" alt="Contact" style="height:40px;"></a>
+    <a href="#" class="email-link-header">
+        <img src="ydrs-Dateien/image003.jpg" alt="Contact" style="height:40px;">
+    </a>
 </div>
 
 <nav class="nav">
@@ -105,149 +160,446 @@ p { font-size:0.95rem; margin:0.5rem 0; }
 <img src="ydrs-Dateien/image009.jpg" alt="Offshore sailing – MB Sailing" class="hero" style="width:100%;border-radius:4px;">
 <div style="text-align:right;font-size:0.8rem;color:#666;">Photo: Ch. Mantel</div>
 
-<h1>Geostrophisches Windlineal (Beta) not optimized for mobile devices</h1>
+<h1>Geostrophisches Windlineal (Beta)</h1>
 <p class="muted">Aus Isobarenabständen Druckgradient, geostrophischen Wind & Bodenwind abschätzen – direkt auf der Karte.</p>
 </header>
 </div>
 
 <!-- ===== TOOL ===== -->
-<div class="tool-shell"><div class="tool-inner">
-<div class="tool-wrapper" id="gradient-tool">
+<div class="tool-shell">
+  <div class="tool-inner">
+    <div class="tool-wrapper" id="gradient-tool">
 
-<div id="controls">
-<h3>Werkzeug</h3>
-<p style="font-size:0.8rem;color:#555;">
-1) Karte laden · 2) Kalibrieren · 3) Isobarenpunkte messen
-</p>
-<label>Karte laden:<input type="file" id="imageLoader" accept="image/*" style="width:100%;"></label>
-<label>Δφ (°):<input type="number" id="deltaPhiDeg" value="10" step="0.1"></label>
-<label>Δp (hPa):<input type="number" id="deltaP" value="5" step="0.1"></label>
-<label>Breite φ (°):<input type="number" id="phiDeg" value="45" step="0.1"></label>
-<label>ρ (kg/m³):<input type="number" id="rho" value="1.25" step="0.01"></label>
-<div style="margin-top:0.6rem;font-size:0.85rem;">
-<b>Untergrund:</b><br>
-<label><input type="radio" name="surface" id="surfaceSea" value="sea" checked> Über See (~70 %)</label>
-<label><input type="radio" name="surface" id="surfaceLand" value="land"> Über Land (~60 %)</label>
+      <div id="controls">
+        <h3>Werkzeug</h3>
+        <p style="font-size:0.8rem;color:#555;">
+            1) Karte laden · 2) Kalibrieren · 3) Isobarenpunkte messen
+        </p>
+
+        <label>
+            Karte laden:
+            <input type="file" id="imageLoader" accept="image/*">
+        </label>
+        <label>
+            Δφ (°):
+            <input type="number" id="deltaPhiDeg" value="10" step="0.1">
+        </label>
+        <label>
+            Δp (hPa):
+            <input type="number" id="deltaP" value="5" step="0.1">
+        </label>
+        <label>
+            Breite φ (°):
+            <input type="number" id="phiDeg" value="45" step="0.1">
+        </label>
+        <label>
+            ρ (kg/m³):
+            <input type="number" id="rho" value="1.25" step="0.01">
+        </label>
+
+        <div style="margin-top:0.6rem;font-size:0.85rem;">
+            <b>Untergrund:</b><br>
+            <label><input type="radio" name="surface" id="surfaceSea" value="sea" checked> Über See (~70 %)</label>
+            <label><input type="radio" name="surface" id="surfaceLand" value="land"> Über Land (~60 %)</label>
+        </div>
+
+        <button id="btnCalibrate">Kalibrieren</button>
+        <button id="btnMeasure">Gradient messen</button>
+
+        <div id="status" style="margin-top:0.4rem;font-size:0.8rem;color:#374151;"></div>
+
+        <h4>Ergebnisse</h4>
+        <div id="results"></div>
+
+        <h4>Log</h4>
+        <div id="log" style="font-family:'IBM Plex Mono',monospace;white-space:pre-wrap;font-size:0.78rem;max-height:150px;overflow-y:auto;background:#f3f4f6;border-radius:6px;padding:6px;"></div>
+
+        <!-- Pan & Zoom Controls -->
+        <div class="view-controls">
+            <span>Ansicht (Zoom & Verschieben):</span>
+            <button type="button" id="viewReset">Reset</button>
+            <button type="button" id="viewZoomIn">+</button>
+            <button type="button" id="viewZoomOut">−</button>
+            <button type="button" id="viewUp">↑</button>
+            <button type="button" id="viewLeft">←</button>
+            <button type="button" id="viewRight">→</button>
+            <button type="button" id="viewDown">↓</button>
+        </div>
+      </div>
+
+      <div id="canvasContainer">
+        <canvas id="mapCanvas"></canvas>
+      </div>
+
+    </div>
+  </div>
 </div>
-<button id="btnCalibrate">Kalibrieren</button>
-<button id="btnMeasure">Gradient messen</button>
-<div id="status"></div>
-<h4>Ergebnisse</h4><div id="results"></div>
-<h4>Log</h4><div id="log" style="font-family:'IBM Plex Mono',monospace;white-space:pre-wrap;font-size:0.78rem;max-height:150px;overflow-y:auto;background:#f3f4f6;border-radius:6px;padding:6px;"></div>
-</div>
-
-<div id="canvasContainer"><canvas id="mapCanvas"></canvas></div>
-
-</div></div></div>
 
 <!-- ===== FOOTER ===== -->
 <footer style="max-width:900px;margin:0 auto;padding:24px 20px;background:white;border-top:1px solid #ddd;font-size:0.9rem;color:#555;">
-<div style="display:flex;justify-content:space-between;flex-wrap:wrap;">
-    <strong>MB Sailing · Matthias Baier</strong>
-    <span>Segeln · Wetterrouting · Navigation</span>
-</div>
+  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;">
+      <strong>MB Sailing · Matthias Baier</strong>
+      <span>Segeln · Wetterrouting · Navigation</span>
+  </div>
 
-<div style="margin-top:8px;line-height:1.45;">
-📌 <strong>Projekt & Code:</strong>
-<a href="https://github.com/windsack/geostrophic-wind-ruler" target="_blank">github.com/windsack/geostrophic-wind-ruler</a><br>
-© 2017–2025 · CC BY-NC 4.0 ·
-<a href="https://creativecommons.org/licenses/by-nc/4.0/deed.de" target="_blank">creativecommons.org/by-nc/4.0</a>
-</div>
+  <div style="margin-top:8px;line-height:1.45;">
+    📌 <strong>Projekt & Code:</strong>
+    <a href="https://github.com/windsack/geostrophic-wind-ruler" target="_blank">github.com/windsack/geostrophic-wind-ruler</a><br>
+    © 2017–2025 · CC BY-NC 4.0 ·
+    <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.de" target="_blank">creativecommons.org/by-nc/4.0</a>
+  </div>
 
-<div style="text-align:center;font-size:0.8rem;color:#777;margin-top:12px;">
-💡 Weitere Tools in Arbeit — <strong>MB Projects</strong><br>
-👉 <a href="https://mb-sailing.com">mb-sailing.com</a>
-</div>
+  <div style="text-align:center;font-size:0.8rem;color:#777;margin-top:12px;">
+    💡 Weitere Tools in Arbeit — <strong>MB Projects</strong><br>
+    👉 <a href="https://mb-sailing.com">mb-sailing.com</a>
+  </div>
 
-<div style="font-size:0.75rem;color:#777;margin-top:14px;">
-Suchbegriffe: Geostrophischer Wind · Druckgradient · Wind aus Isobaren · Yacht Wetterrouting Tool
-</div>
+  <div style="font-size:0.75rem;color:#777;margin-top:14px;">
+    Suchbegriffe: Geostrophischer Wind · Druckgradient · Wind aus Isobaren · Yacht Wetterrouting Tool
+  </div>
 </footer>
 
 <!-- ===== EMAIL FILL ===== -->
 <script>
-document.querySelectorAll("a.email-link-header").forEach(a=>{
-    a.href="mailto:alloceans@mb-sailing.com";
-});
+(function () {
+    const user = "alloceans";
+    const domain = "mb-sailing.com";
+    const email = user + "@" + domain;
+
+    const headerLink = document.querySelector(".email-link-header");
+    if (headerLink) {
+        headerLink.href = "mailto:" + email;
+    }
+})();
 </script>
 
-<!-- ===== MAIN SCRIPT (RETINA READY) ===== -->
+<!-- ===== MAIN SCRIPT: SIMPLIFIED (OHNE DPR), MIT PAN & ZOOM ===== -->
 <script>
-// Canvas Setup
-const imageLoader = document.getElementById('imageLoader');
-const canvas = document.getElementById('mapCanvas');
-const ctx = canvas.getContext('2d');
+// Grund-Setup
+const imageLoader   = document.getElementById('imageLoader');
+const canvas        = document.getElementById('mapCanvas');
+const ctx           = canvas.getContext('2d');
+const btnCalibrate  = document.getElementById('btnCalibrate');
+const btnMeasure    = document.getElementById('btnMeasure');
+const statusDiv     = document.getElementById('status');
+const resultsDiv    = document.getElementById('results');
+const logDiv        = document.getElementById('log');
 
-let img=new Image(),mode=null,clickPoints=[],kmPerPixel=null;
+let img        = new Image();
+let imgLoaded  = false;
 
-function log(msg){ const d=document.getElementById('log');d.textContent+=msg+"\n";d.scrollTop=d.scrollHeight;}
+let mode        = null;
+let clickPoints = [];   // in Bildkoordinaten
+let kmPerPixel  = null;
 
-// RETINA LOAD
+// Viewstate für Pan & Zoom
+let viewZoom    = 1;    // 1 = ganze Karte
+let viewCenterX = 0;
+let viewCenterY = 0;
+
+function log(msg){
+    logDiv.textContent += msg + "\n";
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// Ansicht aus View-Zustand berechnen
+function getViewRect(){
+    if(!imgLoaded){
+        return {x:0,y:0,w:canvas.width,h:canvas.height};
+    }
+    const baseZoomMin = 1;    // nicht unter 1 hinauszoomen
+    const baseZoomMax = 10;   // Deckel
+    viewZoom = Math.max(baseZoomMin, Math.min(viewZoom, baseZoomMax));
+
+    const viewW = img.width  / viewZoom;
+    const viewH = img.height / viewZoom;
+
+    // initial center, falls 0
+    if(viewCenterX === 0 && viewCenterY === 0){
+        viewCenterX = img.width / 2;
+        viewCenterY = img.height / 2;
+    }
+
+    let x = viewCenterX - viewW / 2;
+    let y = viewCenterY - viewH / 2;
+
+    const maxX = img.width  - viewW;
+    const maxY = img.height - viewH;
+
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x > maxX) x = maxX;
+    if (y > maxY) y = maxY;
+
+    return {x, y, w:viewW, h:viewH};
+}
+
+function resetView(){
+    if(!imgLoaded) return;
+    viewZoom    = 1;
+    viewCenterX = img.width  / 2;
+    viewCenterY = img.height / 2;
+    redraw();
+}
+
+// Bild laden + Canvas-Setup (OHNE devicePixelRatio)
 imageLoader.addEventListener('change', e=>{
-    const file=e.target.files[0]; if(!file)return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-        img=new Image();
-        img.onload=()=>{
-            const container=document.getElementById('canvasContainer');
-            const logicalWidth=container.clientWidth;
-            const scale=Math.min(1, logicalWidth/img.width);
-            const dpr=window.devicePixelRatio||1;
+    const file = e.target.files[0];
+    if(!file) return;
 
-            canvas.width  = Math.round(img.width*scale*dpr);
-            canvas.height = Math.round(img.height*scale*dpr);
-            canvas.style.width  = Math.round(img.width*scale)+"px";
-            canvas.style.height = Math.round(img.height*scale)+"px";
+    const reader = new FileReader();
+    reader.onload = ev=>{
+        img = new Image();
+        img.onload = ()=>{
+            imgLoaded = true;
 
-            ctx.setTransform(dpr,0,0,dpr,0,0);
+            const container    = document.getElementById('canvasContainer');
+            const maxWidth     = container.clientWidth;
+            const scale        = Math.min(1, maxWidth / img.width);
+
+            const displayW = img.width * scale;
+            const displayH = img.height * scale;
+
+            canvas.width  = displayW;
+            canvas.height = displayH;
+
+            canvas.style.width  = displayW + "px";
+            canvas.style.height = displayH + "px";
+
+            viewZoom    = 1;
+            viewCenterX = img.width / 2;
+            viewCenterY = img.height / 2;
+
+            clickPoints = [];
+            kmPerPixel  = null;
+            statusDiv.textContent = "Bild geladen. Bitte kalibrieren.";
+
             redraw();
-            log(`Bild: ${img.width}x${img.height} | DPR=${dpr} | Canvas=${canvas.width}x${canvas.height}`);
+            log(`Bild: ${img.width}x${img.height} | Canvas: ${canvas.width}x${canvas.height}`);
         };
-        img.src=ev.target.result;
+        img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
 });
 
-// ===== FUNCTIONS (gekürzt, unverändert in Logik) =====
-function setMode(m){
-    mode=m;clickPoints=[];document.getElementById('status').textContent=(m==="calibrate")?"Kalibrieren":"Gradient messen";
-}
-document.getElementById('btnCalibrate').onclick=()=>setMode("calibrate");
-document.getElementById('btnMeasure').onclick=()=>{
-    if(kmPerPixel==null)return alert("Bitte erst kalibrieren."); setMode("measure");
-};
+// Zeichenfunktion mit ViewRect + Markern
+function redraw(){
+    if(!imgLoaded || !canvas.width) return;
 
-canvas.onclick=e=>{
-    if(!mode||!img.complete)return;
-    const r=canvas.getBoundingClientRect(); const x=e.clientX-r.left, y=e.clientY-r.top;
-    clickPoints.push({x,y}); if(clickPoints.length>2)clickPoints.shift();
-    if(clickPoints.length===2){
-        if(mode==="calibrate") calibrate();
-        else measure();
+    const vr = getViewRect();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(
+        img,
+        vr.x, vr.y, vr.w, vr.h,
+        0, 0, canvas.width, canvas.height
+    );
+
+    // Punkte + Linie zeichnen
+    if(clickPoints.length > 0){
+        ctx.save();
+        ctx.lineWidth = 2;
+        clickPoints.forEach((p, idx)=>{
+            const cx = (p.x - vr.x) / vr.w * canvas.width;
+            const cy = (p.y - vr.y) / vr.h * canvas.height;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 5, 0, 2*Math.PI);
+            ctx.strokeStyle = (idx === clickPoints.length - 1) ? "#ff0000" : "#ff8800";
+            ctx.stroke();
+        });
+        if(clickPoints.length === 2){
+            const p1 = clickPoints[0], p2 = clickPoints[1];
+            const x1 = (p1.x - vr.x) / vr.w * canvas.width;
+            const y1 = (p1.y - vr.y) / vr.h * canvas.height;
+            const x2 = (p2.x - vr.x) / vr.w * canvas.width;
+            const y2 = (p2.y - vr.y) / vr.h * canvas.height;
+            ctx.beginPath();
+            ctx.moveTo(x1,y1);
+            ctx.lineTo(x2,y2);
+            ctx.strokeStyle = "#00aa00";
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+}
+
+// Klick-Handling mit RELATIVEN Koordinaten (robust auf Mobile)
+canvas.addEventListener('click', e=>{
+    if(!imgLoaded || !mode) return;
+
+    const rect = canvas.getBoundingClientRect();
+
+    // relative Position im sichtbaren Canvas (0..1)
+    const xRel = (e.clientX - rect.left) / rect.width;
+    const yRel = (e.clientY - rect.top)  / rect.height;
+
+    // in Bildkoordinaten umrechnen
+    const vr = getViewRect();
+    const imgX = vr.x + xRel * vr.w;
+    const imgY = vr.y + yRel * vr.h;
+
+    clickPoints.push({x:imgX, y:imgY});
+    if(clickPoints.length > 2) clickPoints.shift();
+
+    if(clickPoints.length === 2){
+        if(mode === "calibrate"){
+            handleCalibration();
+            clickPoints = [];
+        } else if(mode === "measure"){
+            handleMeasurement();
+            clickPoints = [];
+        }
     }
     redraw();
-};
+});
 
-function redraw(){
-    if(!img.complete||!canvas.width)return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+// Modi
+function setMode(newMode){
+    if(!imgLoaded){ alert("Bitte zuerst eine Karte laden."); return; }
+    mode = newMode;
+    clickPoints = [];
+    if(newMode === "calibrate"){
+        statusDiv.textContent = "Modus: Kalibrieren – zwei Punkte mit bekanntem Δφ wählen.";
+    } else if(newMode === "measure"){
+        if(kmPerPixel == null){
+            alert("Bitte zuerst kalibrieren.");
+            mode = null;
+            statusDiv.textContent = "";
+            return;
+        }
+        statusDiv.textContent = "Modus: Gradient messen – zwei Punkte auf benachbarten Isobaren auswählen.";
+    }
+    redraw();
 }
 
-function pixelDist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
-function calibrate(){
-    const [p1,p2]=clickPoints; const dist=pixelDist(p1,p2);
-    const dphi=parseFloat(deltaPhiDeg.value);const km=111.2*dphi;
-    kmPerPixel=km/dist; log("Kalibriert: "+kmPerPixel.toFixed(3)+" km/px");
+btnCalibrate.addEventListener('click', () => setMode("calibrate"));
+btnMeasure.addEventListener('click',   () => setMode("measure"));
+
+// Hilfsfunktionen
+function pixelDistance(p1, p2){
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    return Math.sqrt(dx*dx + dy*dy);
 }
-function measure(){
-    const [p1,p2]=clickPoints;const distKM=pixelDist(p1,p2)*kmPerPixel;
-    const dp=parseFloat(deltaP.value)*100,phi=parseFloat(phiDeg.value)*Math.PI/180;
-    const rho=parseFloat(rho.value)||1.25;
-    const f=2*7.2921e-5*Math.sin(phi),vg=(dp/(distKM*1000))/(rho*f);
-    document.getElementById('results').innerHTML=`v<sub>g</sub> ≈ ${vg.toFixed(1)} m/s`;
-    log("v_g ≈ "+vg.toFixed(2)+" m/s");
+
+// Kalibrierung
+function handleCalibration(){
+    if(clickPoints.length !== 2) return;
+    const p1 = clickPoints[0];
+    const p2 = clickPoints[1];
+    const distPx  = pixelDistance(p1, p2);
+    const dphiDeg = parseFloat(document.getElementById('deltaPhiDeg').value);
+
+    if(!dphiDeg || distPx === 0){
+        alert("Bitte sinnvolles Δφ und zwei Punkte wählen.");
+        return;
+    }
+
+    const kmPerDeg = 111.2;
+    const distKm   = dphiDeg * kmPerDeg;
+    kmPerPixel     = distKm / distPx;
+
+    log(`Kalibrierung: Δφ = ${dphiDeg}°, Pixelabstand ≈ ${distPx.toFixed(1)} px → ${kmPerPixel.toFixed(3)} km/px`);
+    statusDiv.textContent = "Kalibriert. Nun Gradient messen.";
 }
+
+// Beaufort-Helfer
+function msToBeaufort(v_ms){
+    const thresholds = [0.3,1.6,3.4,5.5,8.0,10.8,13.9,17.2,20.8,24.5,28.5,32.7];
+    const names = [
+        "Windstille","Leiser Zug","Leichte Brise","Schwache Brise",
+        "Mäßige Brise","Frische Brise","Starker Wind","Steifer Wind",
+        "Stürmischer Wind","Sturm","Schwerer Sturm","Orkanartiger Sturm","Orkan"
+    ];
+    let bft=0;
+    while(bft<thresholds.length && v_ms>=thresholds[bft]) bft++;
+    return {bft, name:names[bft]};
+}
+
+// Messung
+function handleMeasurement(){
+    if(clickPoints.length !== 2) return;
+
+    const p1 = clickPoints[0];
+    const p2 = clickPoints[1];
+
+    const distPx = pixelDistance(p1, p2);
+    const distKm = distPx * kmPerPixel;
+    const distM  = distKm * 1000;
+
+    const deltaP_hPa = parseFloat(document.getElementById('deltaP').value);
+    const phiDeg     = parseFloat(document.getElementById('phiDeg').value);
+    const rho        = parseFloat(document.getElementById('rho').value) || 1.25;
+
+    if(!deltaP_hPa || !phiDeg){
+        alert("Bitte Δp und φ angeben.");
+        return;
+    }
+
+    const deltaP_Pa = deltaP_hPa * 100.0;
+    const gradP     = deltaP_Pa / distM;
+
+    const Omega = 7.2921e-5;
+    const phiRad = phiDeg * Math.PI / 180.0;
+    const f = 2 * Omega * Math.sin(phiRad);
+
+    const v_g    = gradP / (rho * f);
+    const v_kts  = v_g * 1.94384;
+    const v_kmh  = v_g * 3.6;
+    const bft    = msToBeaufort(v_g);
+
+    const surfaceSea  = document.getElementById('surfaceSea');
+    const surfaceLand = document.getElementById('surfaceLand');
+    let factorSurf, surfLabel;
+
+    if(surfaceLand.checked){
+        factorSurf = 0.6; surfLabel = "über Land";
+    } else {
+        factorSurf = 0.7; surfLabel = "über See";
+    }
+
+    const v_surf     = v_g * factorSurf;
+    const v_surf_kts = v_surf * 1.94384;
+    const v_surf_kmh = v_surf * 3.6;
+    const bftSurf    = msToBeaufort(v_surf);
+
+    log(
+        `Messung: Δp = ${deltaP_hPa} hPa, Abstand ≈ ${distKm.toFixed(1)} km → |∂p/∂n| ≈ ${gradP.toExponential(3)} Pa/m, `
+        + `v_g ≈ ${v_g.toFixed(1)} m/s (${v_kts.toFixed(1)} kt, Bft ${bft.bft}), `
+        + `${surfLabel}: ≈ ${v_surf.toFixed(1)} m/s (${v_surf_kts.toFixed(1)} kt, Bft ${bftSurf.bft})`
+    );
+
+    resultsDiv.innerHTML =
+        `<b>Druckgradient:</b> ${gradP.toExponential(3)} Pa/m<br>` +
+        `<b>Geostrophischer Wind:</b> ${v_g.toFixed(1)} m/s ` +
+        `(${v_kmh.toFixed(1)} km/h, ${v_kts.toFixed(1)} kt), Bft ${bft.bft} – ${bft.name}<br>` +
+        `<b>Geschätzter Bodenwind (${surfLabel}, ${Math.round(factorSurf*100)}% v<sub>g</sub>):</b> ` +
+        `${v_surf.toFixed(1)} m/s (${v_surf_kmh.toFixed(1)} km/h, ${v_surf_kts.toFixed(1)} kt), ` +
+        `Bft ${bftSurf.bft} – ${bftSurf.name}`;
+
+    statusDiv.textContent = "Messung abgeschlossen. Weitere Paare können gewählt werden.";
+}
+
+// Pan & Zoom Buttons
+function zoom(factor){
+    if(!imgLoaded) return;
+    viewZoom *= factor;
+    redraw();
+}
+function pan(dxFrac, dyFrac){
+    if(!imgLoaded) return;
+    const vr = getViewRect();
+    viewCenterX += dxFrac * vr.w;
+    viewCenterY += dyFrac * vr.h;
+    redraw();
+}
+
+document.getElementById('viewReset').addEventListener('click', resetView);
+document.getElementById('viewZoomIn').addEventListener('click', ()=>zoom(1.3));
+document.getElementById('viewZoomOut').addEventListener('click',()=>zoom(1/1.3));
+document.getElementById('viewLeft').addEventListener('click', ()=>pan(-0.2, 0));
+document.getElementById('viewRight').addEventListener('click',()=>pan( 0.2, 0));
+document.getElementById('viewUp').addEventListener('click',   ()=>pan( 0, -0.2));
+document.getElementById('viewDown').addEventListener('click', ()=>pan( 0,  0.2));
 </script>
 
 </body>
